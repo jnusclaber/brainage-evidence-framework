@@ -36,6 +36,7 @@
     <a href="#results">Results</a>
     <a href="#independent">PPMI test</a>
     <a href="#nacc">NACC SCAN test</a>
+    <a href="#configurations">Configurations</a>
     <a href="#citation">Citation</a>
     <a href="#acknowledgments">Acknowledgments</a>
   </div>
@@ -153,7 +154,7 @@
     <div class="statuses">
       <div class="status"><span class="chip r">R</span><span>Rule-compliant: every mandatory claim evaluated, every gate passed by its whole 95% interval, and no provenance restriction.</span></div>
       <div class="status"><span class="chip c">C</span><span>Conditionally rule-compliant: every gate passed on its point estimate, but an interval crosses a gate or a provenance restriction applies.</span></div>
-      <div class="status"><span class="chip i">I</span><span>Insufficient evidence: a mandatory claim missing or invalid, or a gate failed on its point estimate while its interval still reaches the acceptable side.</span></div>
+      <div class="status"><span class="chip i">I</span><span>Insufficient evidence: a mandatory claim or a gated estimate's interval missing or invalid, or a gate failed on its point estimate while its interval still reaches the acceptable side.</span></div>
       <div class="status"><span class="chip n">N</span><span>Not rule-compliant: a gate failed by its whole interval.</span></div>
     </div>
     <p>The final status is the most severe outcome (N &succ; I &succ; C &succ; R). The four outcomes correspond to the
@@ -232,8 +233,8 @@
     <h2>Test of gate values in PPMI</h2>
     <p>The candidate gate set was tested in PPMI healthy controls, which no configuration had processed and no training
     had used. Gates anchored to a model-independent reference, the MAE of predicting every participant as the cohort's
-    own mean age, admitted three more configurations that met the target criterion and no more that failed, did at least
-    as well as the conventional gates in every one of 2,000 bootstrap replicates, and reduced false rejections from 15 to
+    own mean age, added three admissions (two distinct configurations) that met the target criterion and no more that failed, did at least
+    as well as the conventional gates in 1,998 of 2,000 bootstrap replicates (all 2,000 with the age-support check added), and reduced false rejections from 15 to
     12. In monitoring, the prespecified hypothesis that every configuration admitted under the 1.25-y change gate passes
     was not supported (DeepBrainNet failed), and loosening the gate to 1.69 y added one true and two false admissions, so
     the 1.25-y gate was kept. The age-support check removed no admission and was not adopted.</p>
@@ -253,11 +254,13 @@
   <section id="nacc">
     <h2>Prospectively specified test in NACC SCAN</h2>
     <p>The development gate set was tested without change in T1-weighted scans of the NACC SCAN program, which played no
-    part in constructing the framework or training any configuration; every status was fixed, and the samples, analysis,
+    part in constructing the framework or training any study-trained or adapted configuration (participant-level
+    independence could not be verified: NACC participants may be co-enrolled in ADNI, and no crosswalk exists); every status was fixed, and the samples, analysis,
     and interpretation criteria were finalized, before any SCAN prediction was computed. Both
     prespecified criteria for non-interchangeability were met: in the Siemens monitoring sample, 15 of 16 within-person
     slope intervals again lay entirely below one, and the pooled transport MAE and the monitoring change RMSE ranked 48 of
-    120 configuration pairs in opposite order. Of the seven configurations certified for monitoring by MAE alone, six had
+    120 configuration pairs in opposite order, 12 of them settled, also under a post hoc bootstrap that drew the
+    participants of both samples jointly. Of the seven configurations certified for monitoring by MAE alone, six had
     a change RMSE above that of the no-change predictor (1.60 y).</p>
 
     <div class="tiles">
@@ -290,6 +293,41 @@
     26.9% under the framework against 24.8% under MAE alone, so with SALD evidence the framework removed admissions
     without making the remaining ones more reliable; its error balance is favourable only when a false admission costs
     more than 1.6 (AIBL evidence) or 3.5 (SALD evidence) times a false rejection.</p>
+  </section>
+
+  <section id="configurations">
+    <h2>Configuration manifest</h2>
+    <p>Each of the 16 configurations is a frozen technical configuration: weights, preprocessing, input transforms,
+    output, and age-bias calibration. Outputs are predicted ages in years; transport and monitoring used them raw, and
+    brain-age-gap claims used a linear age-bias correction fitted on validation controls of the frozen subject-level
+    development split. Adapted models ran released weights on the study's common skull-stripped affine volumes instead
+    of their native preprocessing, which is recorded as a provenance restriction. The
+    <a href="static/data/CONFIGURATION_MANIFEST.csv">full manifest (CSV)</a> also lists every checkpoint file with its
+    SHA-256 checksum, the input shape, the origin of released weights, and the development&ndash;evaluation overlap by
+    evaluation role.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Configuration</th><th>Class</th><th class="num">Members</th><th>Training data</th><th>Preprocessing</th><th>Licence</th></tr></thead>
+        <tbody>
+          <tr><td>SFCN ensemble</td><td>study-trained</td><td class="num">3</td><td>this study&#x27;s frozen training split (ADNI, IXI, OASIS-1, ABIDE-1 controls aged 55–90)</td><td>common frozen volumes</td><td>released with the study code</td></tr>
+          <tr><td>VCDA-Net ensemble</td><td>study-trained</td><td class="num">3</td><td>as SFCN ensemble</td><td>common frozen volumes</td><td>released with the study code</td></tr>
+          <tr><td>MedicalNet ResNet-18</td><td>study-trained</td><td class="num">1</td><td>MedicalNet 23-dataset segmentation pretraining, then this study&#x27;s frozen training split</td><td>common frozen volumes</td><td>released with the study code</td></tr>
+          <tr><td>MedicalNet ResNet-50</td><td>study-trained</td><td class="num">1</td><td>as MedicalNet ResNet-18</td><td>common frozen volumes</td><td>released with the study code</td></tr>
+          <tr><td>DeepBrainNet</td><td>released checkpoint</td><td class="num">1</td><td>not recorded; the release states n=11,729 scans from a &quot;highly diversified cohort&quot; without naming any study</td><td>released slice pipeline on common volumes</td><td>none stated</td></tr>
+          <tr><td>BrainAgeNeXt</td><td>released checkpoint</td><td class="num">5</td><td>not recorded</td><td>released ensemble transform on common volumes</td><td>CC BY-NC 4.0</td></tr>
+          <tr><td>SynthBA</td><td>released checkpoint</td><td class="num">1</td><td>synthetic images generated by domain randomisation from anatomical label maps; the source label maps are not recorded</td><td>released intensity/spatial transform on common volumes</td><td>MIT</td></tr>
+          <tr><td>MIDI T1 seed-60</td><td>released checkpoint</td><td class="num">1</td><td>&gt;23,000 axial head MRI from two UK hospitals (stated for the release&#x27;s T2 models; the T1 corpus is not separately described)</td><td>released post-registration transform on common volumes</td><td>CC BY-NC-ND 4.0 (unmodified copy)</td></tr>
+          <tr><td>Westman CNN1 (adapted)</td><td>released checkpoint, adapted input</td><td class="num">5</td><td>not recorded; the release states &gt;15,000 images from healthy individuals</td><td>common skull-stripped affine volumes replace rigid non-stripped inputs</td><td>MIT</td></tr>
+          <tr><td>Westman CNN2 (adapted)</td><td>released checkpoint, adapted input</td><td class="num">50</td><td>as Westman CNN1</td><td>common skull-stripped affine volumes replace rigid non-stripped inputs</td><td>MIT</td></tr>
+          <tr><td>Westman CNN4 (adapted)</td><td>released checkpoint, adapted input</td><td class="num">50</td><td>as Westman CNN1</td><td>common skull-stripped affine volumes replace rigid non-stripped inputs</td><td>MIT</td></tr>
+          <tr><td>Historical ResNet IXI (adapted)</td><td>released checkpoint, adapted input</td><td class="num">1</td><td>the same Icelandic dataset with transfer learning on IXI (440 images)</td><td>common affine volumes replace CAT12-derived inputs</td><td>none stated</td></tr>
+          <tr><td>Historical ResNet ICE (adapted)</td><td>released checkpoint, adapted input</td><td class="num">1</td><td>an Icelandic MRI dataset (1,264 healthy subjects), not publicly available</td><td>common affine volumes replace CAT12-derived inputs</td><td>none stated</td></tr>
+          <tr><td>de Lange XGBoost</td><td>fixed method, refitted</td><td class="num">1</td><td>no released weights; the published specification refitted on this study&#x27;s frozen training split</td><td>32-region common morphometry, fitted on the frozen training split</td><td>released with the study code</td></tr>
+          <tr><td>Multi-view transformer</td><td>study implementation</td><td class="num">1</td><td>this study&#x27;s frozen training split (ADNI, IXI, OASIS-1, ABIDE-1 controls aged 55–90)</td><td>common frozen volumes</td><td>released with the study code</td></tr>
+          <tr><td>Global--Local Transformer</td><td>study implementation</td><td class="num">3</td><td>this study&#x27;s frozen training split (ADNI, IXI, OASIS-1, ABIDE-1 controls aged 55–90)</td><td>common frozen volumes, three central-slice planes</td><td>released with the study code</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section id="citation">

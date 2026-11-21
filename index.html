@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beyond Cross-Sectional Accuracy</title>
+  <meta name="description" content="A benchmark-derived evidence framework for context-specific conformity assessment of brain-age models: 16 frozen configurations, mandatory non-interchangeable claims, an interval-aware fail-closed decision rule, and tests in PPMI and NACC SCAN.">
+  <meta property="og:title" content="Beyond Cross-Sectional Accuracy: A Benchmark-Derived Evidence Framework for Context-Specific Conformity Assessment of Brain-Age Models">
+  <meta property="og:description" content="Why MAE alone cannot certify a brain-age model for a declared use, and an evidence framework that states which evidence supports a configuration, which is missing, and why.">
+  <meta property="og:image" content="static/images/framework_workflow.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Beyond Cross-Sectional Accuracy</h1>
+    <p class="subtitle">A Benchmark-Derived Evidence Framework for Context-Specific Conformity Assessment of Brain-Age Models</p>
+    <p class="authors"><span>Quoc-Tien Nguyen</span><span>Hyung-Jeong Yang</span><span>for the Alzheimer's Disease Neuroimaging Initiative<a href="#ack-adni">*</a></span></p>
+    <div class="buttons">
+      <span class="button" aria-disabled="true">Paper <small>coming soon</small></span>
+      <span class="button" aria-disabled="true">Code <small>coming soon</small></span>
+    </div>
+  </div>
+</header>
+
+<nav aria-label="Sections">
+  <div class="inner">
+    <a href="#abstract">Abstract</a>
+    <a href="#problem">Why MAE is not enough</a>
+    <a href="#design">Study design</a>
+    <a href="#framework">Framework</a>
+    <a href="#results">Results</a>
+    <a href="#independent">PPMI test</a>
+    <a href="#nacc">NACC SCAN test</a>
+    <a href="#citation">Citation</a>
+    <a href="#acknowledgments">Acknowledgments</a>
+  </div>
+</nav>
+
+<main>
+
+  <section>
+    <div class="tldr">
+      <span class="tldr-label">In one sentence</span>
+      <p>A brain-age model that is accurate on average can still be imprecise, miss within-person change, or fail in a new
+      cohort; we turn a 16-configuration benchmark into an evidence framework that states, for each declared use, whether
+      the evidence supports a configuration, why, and what is missing, and in a prospectively specified NACC test it
+      admitted fewer configurations that failed than certification by MAE alone.</p>
+    </div>
+  </section>
+
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p>Brain-age models are commonly evaluated by mean absolute error (MAE) in healthy controls, although low MAE does not
+    establish same-session precision, longitudinal tracking, or transport to a new cohort. We developed a context-specific
+    evidence framework from a benchmark of 16 frozen configurations. The framework maps each declared use to mandatory,
+    non-interchangeable claims, records estimates, uncertainty, and provenance restrictions in an evidence passport, and
+    returns rule-compliant, conditionally rule-compliant, insufficient-evidence, or not-rule-compliant status. Missing or
+    invalid mandatory evidence cannot lead to admission. In the benchmark, MAE and same-session measurement error ranked
+    54 of 120 configuration pairs in opposite order, and 15 of 16 configurations showed attenuated within-person change
+    relative to elapsed time (slope interval entirely below 1). The same configuration's status differed between
+    transport and monitoring. In independent Parkinson's Progression Markers Initiative controls, replacing the
+    development MAE gates with cohort-specific reference gates yielded three additional decisions that correctly admitted
+    configurations meeting the target criterion, without admitting more that failed it; in monitoring, one admission
+    under the 1.25-y change gate failed. In a prospectively specified test in National Alzheimer's Coordinating Center
+    (NACC) data, attenuation replicated, and accuracy and longitudinal tracking ranked 48 of 120 configuration pairs in
+    opposite order. Against MAE-only certification, the framework admitted fewer configurations that failed in NACC: 2
+    versus 6 of 16 in Siemens monitoring, and 35&ndash;38 versus 58 of 416 configuration&ndash;site transport decisions
+    per evidence cohort. In transport, it rejected more configurations that met the criterion (62&ndash;111 versus 30 of
+    206). The results support context-specific conformity assessment.</p>
+  </section>
+
+  <section id="problem">
+    <h2>Why accuracy alone is not enough</h2>
+    <p>The benchmark evaluated 16 frozen configurations, from study-trained networks to released checkpoints, on six
+    technical claims: provenance (C1), cross-sectional accuracy (C2), same-session precision (C3), cross-cohort precision
+    (C4), longitudinal fidelity (C5), and cross-dataset robustness (C6). The claims measured different properties.</p>
+
+    <div class="tiles">
+      <div class="tile"><div class="value">54 / 120</div><div class="label">configuration pairs ranked in opposite order by MAE and by same-session measurement error (SEM)</div></div>
+      <div class="tile"><div class="value">15 / 16</div><div class="label">configurations whose within-person slope interval lay entirely below one: they attenuate real change</div></div>
+      <div class="tile"><div class="value">16 / 16</div><div class="label">configurations less precise in OASIS-3 than in OASIS-2 (SEM ratio 1.3&ndash;6.0, median 2.2)</div></div>
+    </div>
+
+    <figure>
+      <img src="static/images/report_accuracy_precision.png" alt="Scatter plot of MAE against OASIS-2 same-session SEM for 16 configurations, with 95% bootstrap intervals." loading="lazy">
+      <figcaption>Accuracy against OASIS-2 same-session SEM for the 16 configurations; the dashed line (MAE 4.6 y) and the
+      dash-dotted line (SEM 1.0 y) mark the development-stage gate values, for orientation only. Bars are 95% bootstrap
+      intervals. An asterisk marks an adapted released model.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="static/images/report_precision_tracking.png" alt="Same-session SEM in OASIS-2 and OASIS-3, and within-person slope against change RMSE in AIBL." loading="lazy">
+      <figcaption>Precision across cohorts and longitudinal fidelity. (a) Same-session SEM in OASIS-2 and OASIS-3; the
+      dashed line is the 1.0-y monitoring gate. (b) Within-person slope against change RMSE in 114 stable-CN AIBL
+      participants; the shaded region meets both longitudinal-fidelity gates, and the dotted line marks perfect
+      tracking.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="static/images/report_transport.png" alt="Age distributions of source and target cohorts and source MAE against target MAE." loading="lazy">
+      <figcaption>Demographic support and transport. (a) Age distribution of the transport source sample and the two
+      target cohorts. (b) Source MAE against SALD and AIBL MAE without target adaptation; the dotted line is equality,
+      and dashed lines mark the 4.6-y development-stage MAE gate.</figcaption>
+    </figure>
+  </section>
+
+  <section id="design">
+    <h2>Study design: from benchmark to framework</h2>
+    <p>The framework was built after the benchmark results had been inspected, so every evaluation on the benchmark data
+    is a development analysis. Two tests used data that played no part in constructing the framework, each with its
+    criteria and code locked before any prediction was read.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Stage</th><th>Purpose</th><th>Data</th></tr></thead>
+        <tbody>
+          <tr><td>Benchmark</td><td>Characterize 16 configurations on claims C1&ndash;C6</td><td>ADNI, IXI, OASIS-1, OASIS-2, OASIS-3, AIBL, SALD</td></tr>
+          <tr><td>Construction</td><td>Requirement map, decision rule, gate rules</td><td>Benchmark results</td></tr>
+          <tr><td>Evaluation</td><td>Statuses, selection compared with MAE and BASE-style rules, gate sensitivity, calibration, simulation</td><td>Benchmark data (development)</td></tr>
+          <tr><td>Independent test</td><td>Gate values specified beforehand</td><td>PPMI healthy controls</td></tr>
+          <tr><td>Prospectively specified test</td><td>Replication of the claims; false admissions and rejections against MAE-only certification</td><td>NACC SCAN</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="framework">
+    <h2>The evidence framework</h2>
+    <figure>
+      <img src="static/images/framework_workflow.png" alt="Workflow: declared context of use and requirement map; frozen configurations through provenance check, claim evaluation and evidence passport to a fail-closed decision R, C, I, or N." loading="lazy">
+      <figcaption>Workflow of the framework. Frozen configurations pass the provenance check before the other claims are
+      evaluated; findings are recorded in the evidence passport, and the decision rule checks them against the mandatory
+      claims and gates of the declared context, giving R, C, I, or N.</figcaption>
+    </figure>
+
+    <h3>Four properties that an accuracy ranking lacks</h3>
+    <ul class="clean">
+      <li><strong>Requirements per declared use.</strong> Each context of use maps to mandatory, non-interchangeable claims,
+        so strong accuracy cannot compensate for missing precision or longitudinal evidence.</li>
+      <li><strong>Evidence indexed by environment and population.</strong> A result is stated for the cohort, scanner and
+        population in which it was obtained, not assumed elsewhere.</li>
+      <li><strong>Provenance as a decision constraint.</strong> Possible or unknown development&ndash;evaluation overlap and
+        substituted preprocessing lower the status and stay visible.</li>
+      <li><strong>An explicit insufficient-evidence outcome</strong> instead of a forced choice; missing or invalid
+        mandatory evidence cannot lead to admission.</li>
+    </ul>
+
+    <h3>Interval-aware, fail-closed decisions</h3>
+    <div class="statuses">
+      <div class="status"><span class="chip r">R</span><span>Rule-compliant: every mandatory claim evaluated, every gate passed by its whole 95% interval, and no provenance restriction.</span></div>
+      <div class="status"><span class="chip c">C</span><span>Conditionally rule-compliant: every gate passed on its point estimate, but an interval crosses a gate or a provenance restriction applies.</span></div>
+      <div class="status"><span class="chip i">I</span><span>Insufficient evidence: a mandatory claim missing or invalid, or a gate failed on its point estimate while its interval still reaches the acceptable side.</span></div>
+      <div class="status"><span class="chip n">N</span><span>Not rule-compliant: a gate failed by its whole interval.</span></div>
+    </div>
+    <p>The final status is the most severe outcome (N &succ; I &succ; C &succ; R). The four outcomes correspond to the
+    non-binary decision rule of conformity assessment, with the interval as the guard band; the rule is conjunctive
+    across gates, so no multiplicity adjustment is applied. Admission depends only on the point estimates, and the
+    interval separates R from C and I from N.</p>
+    <figure>
+      <img src="static/images/report_gate_rule.png" alt="Four configurations illustrating the four gate outcomes on the change-error gate." loading="lazy">
+      <figcaption>The interval rule on the monitoring change-error gate, shown with four observed configurations, one per
+      outcome.</figcaption>
+    </figure>
+  </section>
+
+  <section id="results">
+    <h2>Results on the benchmark data</h2>
+
+    <h3>Context-specific statuses, with the reason for each</h3>
+    <p>Transport to SALD admitted seven configurations (2 R, 5 C), transport to AIBL five (all C), and same-scanner
+    monitoring three (SFCN, DeepBrainNet, and BrainAgeNeXt; all C). The same configuration changed status across
+    contexts: DeepBrainNet was N for both transport contexts (source MAE 6.83 y) but C for same-scanner monitoring,
+    whereas MedicalNet ResNet-18 was C for both transport contexts but N for monitoring (change RMSE 1.43 y). SFCN and
+    BrainAgeNeXt were the only configurations admitted in all three contexts. Of the 13 conditional decisions, four were
+    limited by provenance alone, four by uncertainty alone, and five by both, two situations that call for different
+    action.</p>
+    <figure>
+      <img src="static/images/report_status.png" alt="Grid of statuses R, C, I, N for 16 configurations in three contexts, with superscripts for reason types." loading="lazy">
+      <figcaption>Framework status of each configuration in the three technical contexts; the right column counts R, C, I,
+      and N. Superscripts give the reason types: p, performance; u, uncertainty; v, provenance. An asterisk marks an
+      adapted released model.</figcaption>
+    </figure>
+
+    <h3>Same selection quality, more information</h3>
+    <p>The framework chose the configuration chosen by MAE alone and by the BASE overall rule in all three contexts, and no
+    paired difference in excess error between a BASE-style rule and the framework excluded zero. With the same choice, it
+    also reports that SFCN is rule-compliant for SALD but conditional for AIBL (uncertainty) and monitoring (possible
+    training overlap), which configurations lack sufficient evidence and why, and which ranking choices fall outside the
+    admitted set. Selection by the lowest SEM alone chose Westman CNN2, which attenuates within-person change, and raised
+    the held-out change error by 0.49 y.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>Chosen configuration</th><th class="num">Share</th><th class="num">Excess error (y)</th></tr></thead>
+        <tbody>
+          <tr><td colspan="4"><em>Transport to SALD</em></td></tr>
+          <tr><td>Framework</td><td>SFCN ensemble</td><td class="num">91%</td><td class="num">0.78 [0.32, 1.35]</td></tr>
+          <tr><td>BASE overall rule</td><td>SFCN ensemble</td><td class="num">100%</td><td class="num">0.75 [0.29, 1.24]</td></tr>
+          <tr><td>Source MAE only</td><td>SFCN ensemble</td><td class="num">88%</td><td class="num">0.79 [0.31, 1.38]</td></tr>
+          <tr><td colspan="4"><em>Transport to AIBL</em></td></tr>
+          <tr><td>Framework</td><td>SFCN ensemble</td><td class="num">52%</td><td class="num">0.26 [0.00, 1.42]</td></tr>
+          <tr><td>BASE context rule</td><td>MedicalNet ResNet-18</td><td class="num">40%</td><td class="num">0.40 [0.00, 1.15]</td></tr>
+          <tr><td>Source MAE only</td><td>SFCN ensemble</td><td class="num">88%</td><td class="num">0.04 [0.00, 0.23]</td></tr>
+          <tr><td colspan="4"><em>Same-scanner monitoring</em></td></tr>
+          <tr><td>Framework</td><td>SFCN ensemble</td><td class="num">99%</td><td class="num">0.003 [0.00, 0.00]</td></tr>
+          <tr><td>BASE context rule</td><td>BrainAgeNeXt</td><td class="num">57%</td><td class="num">0.172 [0.00, 0.42]</td></tr>
+          <tr><td>SEM only</td><td>Westman CNN2 (adapted)</td><td class="num">100%</td><td class="num">0.487 [0.36, 0.62]</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Share: of 2,000 bootstrap replicates (transport) or 200 half-sample splits (monitoring) choosing the
+    listed configuration; intervals are 2.5th&ndash;97.5th percentiles. Selected rows of the paper's table.</p>
+
+    <h3>What the gate values control</h3>
+    <p>With a true value exactly at the threshold, R was reached in at most 5% of simulated replicates (7.5% for change
+    error with heavy-tailed errors). Scaling all gates of a context changed which configurations were admitted but not
+    which was selected; loosening them raised the admitted configurations that failed in the target from 2 to 5 (SALD)
+    and 1 to 7 (AIBL), and tightening them to 0.8 times the development values left 1%, 97%, and 58% of replicates
+    without a selection for SALD, AIBL, and monitoring.</p>
+    <figure>
+      <img src="static/images/report_gate_sensitivity.png" alt="Admitted configurations, failing admissions, abstention and excess error as all gates are scaled." loading="lazy">
+      <figcaption>Framework evaluation on the development data when all gates of a context are multiplied by a common
+      factor (1 denotes the development values): admitted configurations, share that failed, share of replicates without
+      a selection, and mean excess error of the selected configuration.</figcaption>
+    </figure>
+  </section>
+
+  <section id="independent">
+    <h2>Test of gate values in PPMI</h2>
+    <p>The candidate gate set was tested in PPMI healthy controls, which no configuration had processed and no training
+    had used. Gates anchored to a model-independent reference, the MAE of predicting every participant as the cohort's
+    own mean age, admitted three more configurations that met the target criterion and no more that failed, did at least
+    as well as the conventional gates in every one of 2,000 bootstrap replicates, and reduced false rejections from 15 to
+    12. In monitoring, the prespecified hypothesis that every configuration admitted under the 1.25-y change gate passes
+    was not supported (DeepBrainNet failed), and loosening the gate to 1.69 y added one true and two false admissions, so
+    the 1.25-y gate was kept. The age-support check removed no admission and was not adopted.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Context</th><th>Gate set</th><th class="num">Admitted</th><th class="num">False adm.</th><th class="num">True adm.</th><th class="num">False rej.</th></tr></thead>
+        <tbody>
+          <tr><td>Transport</td><td>MAE gates 4.6 y</td><td class="num">20</td><td class="num">2</td><td class="num">18</td><td class="num">15</td></tr>
+          <tr><td></td><td>MAE gates at the cohort references</td><td class="num">23</td><td class="num">2</td><td class="num">21</td><td class="num">12</td></tr>
+          <tr><td>Monitoring</td><td>Change gate 1.25 y</td><td class="num">3</td><td class="num">1</td><td class="num">2</td><td class="num">4</td></tr>
+          <tr><td></td><td>Change gate 1.69 y</td><td class="num">6</td><td class="num">3</td><td class="num">3</td><td class="num">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="nacc">
+    <h2>Prospectively specified test in NACC SCAN</h2>
+    <p>The development gate set was tested without change in T1-weighted scans of the NACC SCAN program, which played no
+    part in constructing the framework or training any configuration; every status was fixed, and the samples, analysis,
+    and interpretation criteria were finalized, before any SCAN prediction was computed. Both
+    prespecified criteria for non-interchangeability were met: in the Siemens monitoring sample, 15 of 16 within-person
+    slope intervals again lay entirely below one, and the pooled transport MAE and the monitoring change RMSE ranked 48 of
+    120 configuration pairs in opposite order. Of the seven configurations certified for monitoring by MAE alone, six had
+    a change RMSE above that of the no-change predictor (1.60 y).</p>
+
+    <div class="tiles">
+      <div class="tile"><div class="value">48 / 120</div><div class="label">configuration pairs ranked in opposite order by transport MAE and monitoring change error</div></div>
+      <div class="tile"><div class="value">2 vs 6</div><div class="label">false admissions in Siemens monitoring: framework against certification by MAE alone (of 16)</div></div>
+      <div class="tile"><div class="value">35&ndash;38 vs 58</div><div class="label">false admissions in transport, per evidence cohort (of 416 configuration&ndash;site decisions)</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th rowspan="2">Context</th><th rowspan="2" class="num">Failures</th><th colspan="3" class="num">Framework</th><th colspan="3" class="num">MAE alone</th></tr>
+          <tr><th class="num">Adm.</th><th class="num">FA</th><th class="num">FR</th><th class="num">Adm.</th><th class="num">FA</th><th class="num">FR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Monitoring, Siemens</td><td class="num">15 of 16</td><td class="num">3</td><td class="num">2</td><td class="num">0</td><td class="num">7</td><td class="num">6</td><td class="num">0</td></tr>
+          <tr><td>Monitoring, GE/Philips</td><td class="num">14 of 16</td><td class="num">3</td><td class="num">1</td><td class="num">0</td><td class="num">7</td><td class="num">6</td><td class="num">1</td></tr>
+          <tr><td>Transport, AIBL evidence</td><td class="num">210 of 416</td><td class="num">182</td><td class="num">38</td><td class="num">62</td><td class="num">234</td><td class="num">58</td><td class="num">30</td></tr>
+          <tr><td>Transport, SALD evidence</td><td class="num">210 of 416</td><td class="num">130</td><td class="num">35</td><td class="num">111</td><td class="num">234</td><td class="num">58</td><td class="num">30</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Adm., admitted (framework) or certified (MAE alone); FA, false admissions, admitted configurations that
+    failed; FR, false rejections, configurations not admitted that did not fail. Transport decisions are 16
+    configurations at 26 sites for each evidence cohort, of which 206 met the criterion; AIBL and SALD evidence apply the
+    statuses of transport to SALD and to AIBL, respectively. The GE/Philips row applies the Siemens statuses.</p>
+
+    <p>The framework made fewer false admissions than certification by MAE alone in every context, at the cost of more
+    false rejections in transport (62 and 111 against 30). As a share of admissions, false admissions were 20.9% and
+    26.9% under the framework against 24.8% under MAE alone, so with SALD evidence the framework removed admissions
+    without making the remaining ones more reliable; its error balance is favourable only when a false admission costs
+    more than 1.6 (AIBL evidence) or 3.5 (SALD evidence) times a false rejection.</p>
+  </section>
+
+  <section id="citation">
+    <h2>Citation</h2>
+    <p>The manuscript is in preparation. Until it is available, please cite:</p>
+<pre><code>@misc{nguyen2026beyond,
+  title  = {Beyond Cross-Sectional Accuracy: A Benchmark-Derived Evidence
+            Framework for Context-Specific Conformity Assessment of
+            Brain-Age Models},
+  author = {Nguyen, Quoc-Tien and Yang, Hyung-Jeong},
+  year   = {2026},
+  note   = {Manuscript in preparation}
+}</code></pre>
+  </section>
+
+  <section id="acknowledgments">
+    <h2>Data sources and acknowledgments</h2>
+    <p>ADNI, AIBL, OASIS-3, ABIDE-I, PPMI, and NACC SCAN data were obtained from the LONI Image and Data Archive
+    (<a href="https://ida.loni.usc.edu">ida.loni.usc.edu</a>) under approved data use applications, and the linked
+    Uniform Data Set from NACC (<a href="https://naccdata.org">naccdata.org</a>). OASIS-1 and OASIS-2 were obtained from
+    the OASIS website (<a href="https://www.oasis-brains.org">oasis-brains.org</a>), IXI from its project website
+    (<a href="https://brain-development.org/ixi-dataset/">brain-development.org/ixi-dataset</a>), and SALD from the
+    International Neuroimaging Data-sharing Initiative
+    (<a href="https://fcon_1000.projects.nitrc.org/indi/retro/sald.html">fcon_1000.projects.nitrc.org/indi/retro/sald.html</a>).
+    Participant-level data cannot be shared; this page and the paper report aggregate results only.</p>
+
+    <div class="ack">
+      <h3 id="ack-adni">ADNI</h3>
+      <p>* Data used in preparation of this article were obtained from the ADNI database
+      (<a href="https://adni.loni.usc.edu">adni.loni.usc.edu</a>). As such, the investigators within the ADNI contributed
+      to the design and implementation of ADNI and/or provided data but did not participate in analysis or writing of
+      this report. A complete listing of ADNI investigators can be found at:
+      <a href="http://adni.loni.usc.edu/wp-content/uploads/how_to_apply/ADNI_Acknowledgement_List.pdf">adni.loni.usc.edu/wp-content/uploads/how_to_apply/ADNI_Acknowledgement_List.pdf</a>.</p>
+      <p>Data used in the preparation of this article were obtained from the Alzheimer's Disease Neuroimaging
+      Initiative (ADNI) database (<a href="https://adni.loni.usc.edu">adni.loni.usc.edu</a>). The ADNI was launched in
+      2003 as a public-private partnership, led by Principal Investigator Michael W. Weiner, MD. The primary goal of ADNI
+      has been to test whether serial magnetic resonance imaging (MRI), positron emission tomography (PET), other
+      biological markers, and clinical and neuropsychological assessment can be combined to measure the progression of
+      mild cognitive impairment (MCI) and early Alzheimer's disease (AD).</p>
+      <details>
+        <summary>ADNI funding</summary>
+        <p>Data collection and sharing for the Alzheimer's Disease Neuroimaging Initiative (ADNI) is funded by the
+        National Institute on Aging (National Institutes of Health Grant U19 AG024904). The grantee organization is the
+        Northern California Institute for Research and Education. In the past, ADNI has also received funding from the
+        National Institute of Biomedical Imaging and Bioengineering, the Canadian Institutes of Health Research, and
+        private sector contributions through the Foundation for the National Institutes of Health (FNIH) including
+        generous contributions from the following: AbbVie, Alzheimer's Association; Alzheimer's Drug Discovery
+        Foundation; Araclon Biotech; BioClinica, Inc.; Biogen; Bristol-Myers Squibb Company; CereSpir, Inc.; Cogstate;
+        Eisai Inc.; Elan Pharmaceuticals, Inc.; Eli Lilly and Company; EuroImmun; F. Hoffmann-La Roche Ltd and its
+        affiliated company Genentech, Inc.; Fujirebio; GE Healthcare; IXICO Ltd.; Janssen Alzheimer Immunotherapy
+        Research &amp; Development, LLC.; Johnson &amp; Johnson Pharmaceutical Research &amp; Development LLC.; Lumosity;
+        Lundbeck; Merck &amp; Co., Inc.; Meso Scale Diagnostics, LLC.; NeuroRx Research; Neurotrack Technologies;
+        Novartis Pharmaceuticals Corporation; Pfizer Inc.; Piramal Imaging; Servier; Takeda Pharmaceutical Company; and
+        Transition Therapeutics.</p>
+      </details>
+
+      <h3>AIBL</h3>
+      <p>AIBL is funded by the Commonwealth Scientific and Industrial Research Organisation, the National Health and
+      Medical Research Council, and participating institutions; its researchers
+      (<a href="https://aibl.org.au">aibl.org.au</a>) contributed data but not analysis or writing.</p>
+
+      <h3>OASIS</h3>
+      <p>Data were provided in part by OASIS: Cross-Sectional and Longitudinal (Principal Investigators D. Marcus,
+      R. Buckner, J. Csernansky, and J. Morris; P50 AG05681, P01 AG03991, P01 AG026276, R01 AG021910, P20 MH071616, and
+      U24 RR021382) and OASIS-3: Longitudinal Multimodal Neuroimaging (Principal Investigators T. Benzinger, D. Marcus,
+      and J. Morris; P30 AG066444, P50 AG00561, P30 NS09857781, P01 AG026276, P01 AG003991, R01 AG043434, UL1 TR000448,
+      and R01 EB009352).</p>
+
+      <h3>PPMI</h3>
+      <p>Data used in the preparation of this article was obtained on 2026-09-13 from the Parkinson's Progression Markers
+      Initiative (PPMI) database
+      (<a href="https://www.ppmi-info.org/access-data-specimens/download-data">www.ppmi-info.org/access-data-specimens/download-data</a>),
+      RRID:SCR_006431. For up-to-date information on the study, visit
+      <a href="https://www.ppmi-info.org">www.ppmi-info.org</a>.</p>
+      <details>
+        <summary>PPMI funding</summary>
+        <p>PPMI &ndash; a public-private partnership &ndash; is funded by the Michael J. Fox Foundation for Parkinson's
+        Research and funding partners, including AbbVie, Alamar Biosciences, Aligning Science Across Parkinson's (ASAP),
+        Arrowhead Pharma, Arvinas, AskBio, BIAL, BioArctic, Biohaven, BlueRock Therapeutics, Bristol Myers Squibb,
+        Calico Labs, Capsida Biotherapeutics, Critical Path Institute, DaCapo Brainscience, Denali, Edmond J. Safra
+        Foundation, Eli Lilly, Gain Therapeutics, GE Healthcare, Genentech, GSK, Insitro, Johnson &amp; Johnson
+        Innovative Medicine, Lundbeck, Merck, Neumora, Neuron23, Novartis, Olink, Regeneron, Roche, Sanofi, Tenvie, UCB,
+        Vanqua Bio, Voyager Therapeutics, and The Weston Family Foundation.</p>
+      </details>
+
+      <h3 id="ack-nacc">NACC SCAN</h3>
+      <p>The NACC database is funded by NIA/NIH Grant U24 AG072122. SCAN is a multi-institutional project that
+      was funded as a U24 grant (AG067418) by the National Institute on Aging in May 2020. Data collected by
+      SCAN and shared by NACC are contributed by the NIA-funded ADRCs as follows: Arizona Alzheimer's Center -
+      P30 AG072980 (PI: Eric Reiman, MD); R01 AG069453 (PI: Eric Reiman (contact), MD); P30 AG019610 (PI: Eric
+      Reiman, MD); and the State of Arizona which provided additional funding supporting our center; Boston
+      University - P30 AG013846 (PI Neil Kowall MD); Cleveland ADRC - P30 AG062428 (James Leverenz, MD);
+      Cleveland Clinic, Las Vegas &ndash; P20AG068053; Columbia - P50 AG008702 (PI Scott Small MD); Duke/UNC
+      ADRC &ndash; P30 AG072958; Emory University - P30AG066511 (PI Levey Allan, MD, PhD); Indiana University -
+      R01 AG19771 (PI Andrew Saykin, PsyD); P30 AG10133 (PI Andrew Saykin, PsyD); P30 AG072976 (PI Andrew
+      Saykin, PsyD); R01 AG061788 (PI Shannon Risacher, PhD); R01 AG053993 (PI Yu-Chien Wu, MD, PhD); U01
+      AG057195 (PI Liana Apostolova, MD); U19 AG063911 (PI Bradley Boeve, MD); and the Indiana University
+      Department of Radiology and Imaging Sciences; Johns Hopkins - P30 AG066507 (PI Marilyn Albert, Phd.); Mayo
+      Clinic - P50 AG016574 (PI Ronald Petersen MD PhD); Mount Sinai - P30 AG066514 (PI Mary Sano, PhD); R01
+      AG054110 (PI Trey Hedden, PhD); R01 AG053509 (PI Trey Hedden, PhD); New York University - P30AG066512-01S2
+      (PI Thomas Wisniewski, MD); R01AG056031 (PI Ricardo Osorio, MD); R01AG056531 (PIs Ricardo Osorio, MD;
+      Girardin Jean-Louis, PhD); Northwestern University - P30 AG013854 (PI Robert Vassar PhD); R01 AG045571 (PI
+      Emily Rogalski, PhD); R56 AG045571, (PI Emily Rogalski, PhD); R01 AG067781, (PI Emily Rogalski, PhD); U19
+      AG073153, (PI Emily Rogalski, PhD); R01 DC008552, (M.-Marsel Mesulam, MD); R01 AG077444, (PIs M.-Marsel
+      Mesulam, MD, Emily Rogalski, PhD); R01 NS075075 (PI Emily Rogalski, PhD); R01 AG056258 (PI Emily Rogalski,
+      PhD); Oregon Health and Science University - P30 AG066518 (PIs Lisa Silbert, MD, Kevin Duff, PhD); R56
+      AG074321 (PI Jeffrey Kaye, MD); Rush University - P30 AG010161 (PI David Bennett MD); Stanford &ndash;
+      P30AG066515; P50 AG047366 (PI Victor Henderson MD MS); University of Alabama, Birmingham &ndash; P20;
+      University of California, Davis - P30 AG10129 (PI Charles DeCarli, MD); P30 AG072972 (PI Charles DeCarli,
+      MD); University of California, Irvine - P50 AG016573 (PI Frank LaFerla PhD); University of California, San
+      Diego - P30AG062429 (PI James Brewer, MD, PhD); University of California, San Francisco - P30 AG062422
+      (Rabinovici, Gil D., MD); University of Kansas - P30 AG035982 (Russell Swerdlow, MD); University of
+      Kentucky - P30 AG028283-15S1 (PIs Linda Van Eldik, PhD and Brian Gold, PhD); University of Michigan ADRC -
+      P30AG053760 (PI Henry Paulson, MD, PhD) P30AG072931 (PI Henry Paulson, MD, PhD) Cure Alzheimer's Fund
+      200775 - (PI Henry Paulson, MD, PhD) U19 NS120384 (PI Charles DeCarli, MD, University of Michigan Site PI
+      Henry Paulson, MD, PhD) R01 AG068338 (MPI Bruno Giordani, PhD, Carol Persad, PhD, Yi Murphey, PhD)
+      S10OD026738-01 (PI Douglas Noll, PhD) R01 AG058724 (PI Benjamin Hampstead, PhD) R35 AG072262 (PI Benjamin
+      Hampstead, PhD) W81XWH2110743 (PI Benjamin Hampstead, PhD) R01 AG073235 (PI Nancy Chiaravalloti,
+      University of Michigan Site PI Benjamin Hampstead, PhD) 1I01RX001534 (PI Benjamin Hampstead, PhD)
+      IRX001381 (PI Benjamin Hampstead, PhD); University of New Mexico - P20 AG068077 (Gary Rosenberg, MD);
+      University of Pennsylvania - State of PA project 2019NF4100087335 (PI David Wolk, MD); Rooney Family
+      Research Fund (PI David Wolk, MD); R01 AG055005 (PI David Wolk, MD); University of Pittsburgh - P50
+      AG005133 (PI Oscar Lopez MD); University of Southern California - P50 AG005142 (PI Helena Chui MD);
+      University of Washington - P50 AG005136 (PI Thomas Grabowski MD); University of Wisconsin - P50 AG033514
+      (PI Sanjay Asthana MD FRCP); Vanderbilt University &ndash; P20 AG068082; Wake Forest - P30AG072947 (PI
+      Suzanne Craft, PhD); Washington University, St. Louis - P01 AG03991 (PI John Morris MD); P01 AG026276 (PI
+      John Morris MD); P20 MH071616 (PI Dan Marcus); P30 AG066444 (PI John Morris MD); P30 NS098577 (PI Dan
+      Marcus); R01 AG021910 (PI Randy Buckner); R01 AG043434 (PI Catherine Roe); R01 EB009352 (PI Dan Marcus);
+      UL1 TR000448 (PI Brad Evanoff); U24 RR021382 (PI Bruce Rosen); Avid Radiopharmaceuticals / Eli Lilly; Yale
+      - P50 AG047270 (PI Stephen Strittmatter MD PhD); R01AG052560 (MPI: Christopher van Dyck, MD; Richard
+      Carson, PhD); R01AG062276 (PI: Christopher van Dyck, MD); Florida - P30AG066506-03 (PI Glenn Smith, PhD);
+      P50 AG047266 (PI Todd Golde MD PhD).</p>
+
+      <h3>IXI, SALD, and ABIDE-I</h3>
+      <p>We thank the IXI project, the Southwest University Adult Lifespan Dataset (SALD) and the International
+      Neuroimaging Data-sharing Initiative, and the Autism Brain Imaging Data Exchange (ABIDE-I) for making their data
+      openly available.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="inner">
+    Data used in this work were obtained from ADNI, AIBL, OASIS, IXI, ABIDE-I, SALD, PPMI, and NACC under their respective
+    data use agreements; this page shows aggregate results only.
+  </div>
+</footer>
+
+</body>
+</html>
